@@ -1,0 +1,15 @@
+{
+    "name": "ugent-geography/php-geotools",
+    "description": "A collection of PHP classes useful for building a simple PHP GIS web application.",
+    "version": "0.1.0",
+    "authors": [
+        {
+            "name": "Michiel Van den Berghe",
+            "email": "michiel.vdb@gmail.com"
+        }
+    ],
+    "require": {
+        "lichtner/fluentpdo": "dev-master",
+        "phayes/geophp": "~1.2"
+    }
+}
