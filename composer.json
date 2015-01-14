@@ -1,5 +1,7 @@
 {
     "name": "ugent-geography/php-geotools",
+    "license": "WTFPL",
+    "type": "library",
     "description": "A collection of PHP classes useful for building a simple PHP GIS web application.",
     "version": "0.1.0",
     "authors": [
