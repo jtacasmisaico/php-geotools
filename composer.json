@@ -13,5 +13,10 @@
     "require": {
         "lichtner/fluentpdo": "dev-master",
         "phayes/geophp": "~1.2"
+    },
+    "autoload": {
+        "psr-4": {
+            "geography\\": ""
+        }
     }
 }
