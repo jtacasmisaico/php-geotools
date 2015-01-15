@@ -34,15 +34,24 @@ class Connection {
             $this->config['password']
         );
 
-        $this->db->setAttribute( PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+        $this->db->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+        $this->db->setAttribute(PDO::ATTR_EMULATE_PREPARES, false);
 
         $this->queries = $this->loadQueries($this->config['queriesFolder']);
         $this->builder = new FluentPDO($this->db);
     }
 
-    public function query($name, $options = [], $format = PDO::FETCH_OBJ) {
-        $stm = $this->getStatement($name, $options);
-        $stm->execute();
+    public function query($sql, $options = [], $format = PDO::FETCH_OBJ) {
+        $stm = $this->getStatement($sql, $options);
+        try {
+            $stm->execute();
+        } catch(\PDOException $ex) {
+            throw new DatabaseException(
+                "Invalid query $sql, or invalid query options",
+                $ex->getCode(),
+                $ex
+            );
+        }
         $result = [];
         while($tuple = $stm->fetch($format)) {
             $result[] = $tuple;
@@ -51,19 +60,25 @@ class Connection {
     }
 
     public function all($name, $options = [], $format = PDO::FETCH_OBJ) {
-        return $this->query($name, $options, $format);
+        return $this->query($this->getQuery($name), $options, $format);
     }
 
     public function one($name, $options = [], $format = PDO::FETCH_OBJ) {
-        return $this->query($name, $options, $format)[0];
+        $data = $this->query($this->getQuery($name), $options, $format);
+        if(!isset($data) || count($data) === 0) {
+            throw new NotFound(
+                "query: $name, options:" . print_r($options, true)
+            );
+        }
+        return $data[0];
     }
 
     public function go($name, $options = [], $format = PDO::FETCH_OBJ) {
-        return $this->query($name, $options, $format);
+        return $this->query($this->getQuery($name), $options, $format);
     }
 
     public function column($name, $options = []) {
-        $stm = $this->getStatement($name, $options);
+        $stm = $this->getStatement($this->getQuery($name), $options);
         $stm->execute();
         return $stm->fetchAll(PDO::FETCH_COLUMN, 0);
     }
@@ -73,14 +88,13 @@ class Connection {
         try {
             $func();
             $this->db->commit();
-        } catch(Exception $ex) {
+        } catch(\Exception $ex) {
             $this->db->rollBack();
             throw $ex;
         }
     }
 
-    protected function getStatement($name, $options = []) {
-        $sql = $this->queries[$name];
+    protected function getStatement($sql, $options = []) {
         // is this a non-associative array?
         if(array_values($options) === $options) {
             $option_string = rtrim(str_repeat('?,', count($options)), ',');
@@ -105,6 +119,13 @@ class Connection {
             $queries = array_merge($queries, yaml_parse_file($path));
         }
         return $queries;
+    }
+
+    protected function getQuery($name) {
+        if(!array_key_exists($name, $this->queries)) {
+            throw new DatabaseException(sprintf('Query "%s" not found', $name));
+        }
+        return $this->queries[$name];
     }
 
 }
