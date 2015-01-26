@@ -44,12 +44,12 @@ class GeoJSON {
 
         $props = $obj->properties;
         $props->geometry = $obj->geometry;
-        if($geometry_format === 'json') {
-            $props->geometry = json_encode($props->geometry);
+        if($format === 'json') {
+            $props->$attr = json_encode($props->$attr);
         }
 
-        if($geometry_format === 'geoPHP') {
-            $props->geometry = geoPHP::load($props->geometry, 'json');
+        if($format === 'geoPHP') {
+            $props->$attr = geoPHP::load($props->$attr, 'json');
         }
 
         return $props;
