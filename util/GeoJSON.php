@@ -25,7 +25,7 @@ class GeoJSON {
 
         list($attr, $format) = static::geometryAttribute($geometry_attr);
         $geometry = geoPHP::load($arr[$attr], $format)->out('json', true);
-        
+
         unset($arr[$attr]);
 
         return [
@@ -37,7 +37,11 @@ class GeoJSON {
 
     public static function object($feature, $geometry_attr = ['geometry' => 'array']) {
         list($attr, $format) = static::geometryAttribute($geometry_attr);
-        $obj = json_decode($feature);
+        $obj = $feature;
+        if(is_string($feature)) {
+            $obj = json_decode($feature);
+        }
+
         $props = $obj->properties;
         $props->geometry = $obj->geometry;
         if($geometry_format === 'json') {
@@ -49,6 +53,14 @@ class GeoJSON {
         }
 
         return $props;
+    }
+
+    public static function objects($collection, $geometry_attr = ['geometry' => 'array']) {
+        $objects = [];
+        foreach(json_decode($collection)->features as $feature) {
+            $objects[] = static::object($feature, $geometry_attr);
+        }
+        return $objects;
     }
 
     public static function arr($feature, $geometry_attr = ['geometry' => 'array']) {
