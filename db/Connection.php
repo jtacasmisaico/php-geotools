@@ -48,7 +48,7 @@ class Connection {
         } catch(\PDOException $ex) {
             throw new DatabaseException(
                 "Invalid query $sql, or invalid query options",
-                $ex->getCode(),
+                is_int($ex->getCode()) ? $ex->getCode() : 1337, // stupid PDO!
                 $ex
             );
         }
