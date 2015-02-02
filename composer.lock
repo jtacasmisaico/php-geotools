@@ -4,7 +4,7 @@
         "Read more about it at http://getcomposer.org/doc/01-basic-usage.md#composer-lock-the-lock-file",
         "This file is @generated automatically"
     ],
-    "hash": "90ef2cd555aef6a35a0b2d0b05e99be5",
+    "hash": "ac5197afbc8fcf9735c3c7b48a37dea5",
     "packages": [
         {
             "name": "lichtner/fluentpdo",
@@ -12,12 +12,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/lichtner/fluentpdo.git",
-                "reference": "e3d263795e2acfd03b7080eee33accae0436fee3"
+                "reference": "fa2721faf75fc54c29553798886c1bf7c6d07444"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/lichtner/fluentpdo/zipball/e3d263795e2acfd03b7080eee33accae0436fee3",
-                "reference": "e3d263795e2acfd03b7080eee33accae0436fee3",
+                "url": "https://api.github.com/repos/lichtner/fluentpdo/zipball/fa2721faf75fc54c29553798886c1bf7c6d07444",
+                "reference": "fa2721faf75fc54c29553798886c1bf7c6d07444",
                 "shasum": ""
             },
             "type": "library",
@@ -44,7 +44,7 @@
                 "dbal",
                 "pdo"
             ],
-            "time": "2014-11-11 13:51:12"
+            "time": "2015-01-26 12:23:08"
         },
         {
             "name": "phayes/geophp",
@@ -81,6 +81,53 @@
             "description": "GeoPHP is a open-source native PHP library for doing geometry operations. It is written entirely in PHP and can therefore run on shared hosts. It can read and write a wide variety of formats: WKT (including EWKT), WKB (including EWKB), GeoJSON, KML, GPX, GeoRSS). It works with all Simple-Feature geometries (Point, LineString, Polygon, GeometryCollection etc.) and can be used to get centroids, bounding-boxes, area, and a wide variety of other useful information.",
             "homepage": "https://github.com/phayes/geoPHP",
             "time": "2014-12-02 06:11:22"
+        },
+        {
+            "name": "symfony/yaml",
+            "version": "v2.6.3",
+            "target-dir": "Symfony/Component/Yaml",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/symfony/Yaml.git",
+                "reference": "82462a90848a52c2533aa6b598b107d68076b018"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/symfony/Yaml/zipball/82462a90848a52c2533aa6b598b107d68076b018",
+                "reference": "82462a90848a52c2533aa6b598b107d68076b018",
+                "shasum": ""
+            },
+            "require": {
+                "php": ">=5.3.3"
+            },
+            "type": "library",
+            "extra": {
+                "branch-alias": {
+                    "dev-master": "2.6-dev"
+                }
+            },
+            "autoload": {
+                "psr-0": {
+                    "Symfony\\Component\\Yaml\\": ""
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Symfony Community",
+                    "homepage": "http://symfony.com/contributors"
+                },
+                {
+                    "name": "Fabien Potencier",
+                    "email": "fabien@symfony.com"
+                }
+            ],
+            "description": "Symfony Yaml Component",
+            "homepage": "http://symfony.com",
+            "time": "2015-01-03 15:33:07"
         }
     ],
     "packages-dev": [],

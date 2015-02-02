@@ -12,7 +12,8 @@
     ],
     "require": {
         "lichtner/fluentpdo": "dev-master",
-        "phayes/geophp": "~1.2"
+        "phayes/geophp": "~1.2",
+        "symfony/yaml": "*"
     },
     "autoload": {
         "psr-4": {

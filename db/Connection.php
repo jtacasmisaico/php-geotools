@@ -1,6 +1,8 @@
 <?php
 namespace geography\db;
 
+use Symfony\Component\Yaml\Parser;
+
 use PDO;
 use FluentPDO;
 
@@ -115,8 +117,11 @@ class Connection {
 
     protected function loadQueries($folder) {
         $queries = [];
+        $yaml = new Parser();
         foreach(glob($folder . '/*.yaml') as $path) {
-            $queries = array_merge($queries, yaml_parse_file($path));
+            $queries = array_merge($queries, 
+                $yaml->parse(file_get_contents($path))
+            );
         }
         return $queries;
     }
