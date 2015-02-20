@@ -11,7 +11,7 @@ class Connection {
     private $queries;
 
     private $config = [
-        'schema' => 'postgis',
+        'database' => 'postgis',
         'server' => 'localhost',
         'port' => 5432,
         'username' => 'postgis',
@@ -27,7 +27,7 @@ class Connection {
         // Build the connection string from the $config field.
         $connectionString = sprintf('pgsql:host=%s;dbname=%s;port=%d',
             $this->config['server'],
-            $this->config['schema'],
+            $this->config['database'],
             $this->config['port']
         );
 
@@ -43,44 +43,43 @@ class Connection {
         $this->builder = new FluentPDO($this->db);
     }
 
-    public function query($sql, $options = [], $format = PDO::FETCH_OBJ) {
+    public function __call($name, $arguments) {
+        $options = $arguments[0];
+        $query = $this->getQuery($name);
+        $format = PDO::FETCH_OBJ;
+        $multiple = true;
+        $cls = null;
+        if(is_array($query['returns']) && count($query['returns'])) {
+            if(count($query['returns']) > 0) {
+                $format = PDO::FETCH_CLASS;
+                $cls = $query['returns'][0];
+            }
+        } else {
+            $format = PDO::FETCH_CLASS;
+            $multiple = false;
+            $cls = $query['returns'];
+        }
+        $result = $this->query($query['sql'], $options, $format, $cls);
+        
+        if(!$multiple && count($result) == 0) {
+            throw new NotFound(sprintf(
+                'query: %s, options: %s',
+                $query['sql'], print_r($options, true)
+            ));
+        }
+        return $multiple ? $result : $result[0];
+    }
+
+    public function query($sql, $options = [], $format = PDO::FETCH_OBJ, $cls = null) {
         $stm = $this->getStatement($sql, $options);
-        try {
-            $stm->execute();
-        } catch(\PDOException $ex) {
-            throw new DatabaseException(
-                "Invalid query $sql, or invalid query options",
-                is_int($ex->getCode()) ? $ex->getCode() : 1337, // stupid PDO!
-                $ex
-            );
-        }
-        $result = [];
-        while($tuple = $stm->fetch($format)) {
-            $result[] = $tuple;
-        }
-        return $result;
-    }
-
-    public function all($name, $options = [], $format = PDO::FETCH_OBJ) {
-        return $this->query($this->getQuery($name), $options, $format);
-    }
-
-    public function one($name, $options = [], $format = PDO::FETCH_OBJ) {
-        $data = $this->query($this->getQuery($name), $options, $format);
-        if(!isset($data) || count($data) === 0) {
-            throw new NotFound(
-                "query: $name, options:" . print_r($options, true)
-            );
-        }
-        return $data[0];
-    }
-
-    public function go($name, $options = [], $format = PDO::FETCH_OBJ) {
-        return $this->query($this->getQuery($name), $options, $format);
+        if($cls == null) $stm->setFetchMode($format);
+        else $stm->setFetchMode($format, $cls);
+        $stm->execute();
+        return $stm->fetchAll();
     }
 
     public function column($name, $options = []) {
-        $stm = $this->getStatement($this->getQuery($name), $options);
+        $stm = $this->getStatement($this->getQuery($name)['sql'], $options);
         $stm->execute();
         return $stm->fetchAll(PDO::FETCH_COLUMN, 0);
     }
@@ -97,6 +96,10 @@ class Connection {
     }
 
     protected function getStatement($sql, $options = []) {
+        if(is_object($options)) {
+            $options = get_object_vars($options);
+        }
+
         // is this a non-associative array?
         if(array_values($options) === $options) {
             $option_string = rtrim(str_repeat('?,', count($options)), ',');
@@ -126,11 +129,18 @@ class Connection {
         return $queries;
     }
 
-    protected function getQuery($name) {
+    public function getQuery($name) {
         if(!array_key_exists($name, $this->queries)) {
             throw new DatabaseException(sprintf('Query "%s" not found', $name));
         }
-        return $this->queries[$name];
+        $q = $this->queries[$name];
+        if(!is_string($q)) {
+            return $q;
+        }
+        return [
+            'sql' => $q,
+            'returns' => []
+        ];
     }
 
 }
