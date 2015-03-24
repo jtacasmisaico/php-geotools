@@ -43,8 +43,10 @@ class Connection {
         $this->builder = new FluentPDO($this->db);
     }
 
-    public function __call($name, $arguments) {
-        $options = $arguments[0];
+    public function __call($name, $options = []) {
+        if(isset($options[0])) {
+            $options = $options[0];
+        }
         $query = $this->getQuery($name);
         $format = PDO::FETCH_OBJ;
         $multiple = true;
@@ -60,7 +62,7 @@ class Connection {
             $cls = $query['returns'];
         }
         $result = $this->query($query['sql'], $options, $format, $cls);
-        
+
         if(!$multiple && count($result) == 0) {
             throw new NotFound(sprintf(
                 'query: %s, options: %s',
@@ -101,7 +103,7 @@ class Connection {
         }
 
         // is this a non-associative array?
-        if(array_values($options) === $options) {
+        if(count($options) && array_values($options) === $options) {
             $option_string = rtrim(str_repeat('?,', count($options)), ',');
             $sql = str_replace(':values', $option_string, $sql);
             $stm = $this->db->prepare($sql);
@@ -112,7 +114,15 @@ class Connection {
         }
 
         $stm = $this->db->prepare($sql);
+        error_log(print_r($options, true), 4);
         foreach($options as $k => $v) {
+            if($v instanceof \DateTime) {
+                $v = $v->format(\DateTime::ISO8601);
+            }
+
+            if(is_bool($v)) {
+                $v = (int) $v;
+            }
             $stm->bindValue(':' . $k, $v);
         }
         return $stm;
@@ -122,7 +132,7 @@ class Connection {
         $queries = [];
         $yaml = new Parser();
         foreach(glob($folder . '/*.yaml') as $path) {
-            $queries = array_merge($queries, 
+            $queries = array_merge($queries,
                 $yaml->parse(file_get_contents($path))
             );
         }
